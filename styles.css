@@ -7,3 +7,14 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 .nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:25;backdrop-filter:blur(2px)}
 @media(max-width:600px){.sidebar.mobile-open{display:flex;z-index:50;left:0;top:0;bottom:0;width:248px;padding:22px 15px;box-shadow:30px 0 70px rgba(0,0,0,.35)}.sidebar.mobile-open .brand{justify-content:flex-start;padding:0 11px 28px}.sidebar.mobile-open .brand-copy,.sidebar.mobile-open .sidebar-label,.sidebar.mobile-open .nav-item>span:not(.nav-icon):not(.nav-count),.sidebar.mobile-open .nav-count,.sidebar.mobile-open .sidebar-bottom{display:initial}.sidebar.mobile-open .sidebar-bottom{display:block;margin-top:auto}.sidebar.mobile-open .nav-item{justify-content:flex-start;padding:0 13px;width:100%}.sidebar.mobile-open .nav-count{display:inline-flex;margin-left:auto}.sidebar.mobile-open .nav-icon{display:inline-flex}.sidebar.mobile-open .offline-indicator{display:flex}.sidebar.mobile-open .offline-indicator div{display:flex}.sidebar.mobile-open .sidebar-foot{display:block}}
+
+
+/* StudyMate routine recovery and weekly buffer day */
+.recovery-section{margin:30px 0 36px}
+.recovery-heading{margin-bottom:14px;align-items:flex-start}
+.recovery-heading p{max-width:760px}
+.recovery-heading .pill{white-space:nowrap}
+.agenda-day.buffer-day{border-color:rgba(231,188,105,.36);background:linear-gradient(135deg,rgba(231,188,105,.055),transparent 65%),var(--panel)}
+.agenda-day.buffer-day .agenda-day-heading strong{color:var(--gold-2)}
+.buffer-note{margin-top:10px;padding:11px 13px;border-left:3px solid var(--gold);border-radius:8px;background:rgba(231,188,105,.07);color:var(--soft);font-size:12px}
+.mini-agenda-row.buffer-row .mini-date{color:var(--gold-2)}
