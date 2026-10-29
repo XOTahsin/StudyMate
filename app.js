@@ -167,7 +167,7 @@
     const start=isoAdd(localISO(),upcomingOffset*7), end=isoAdd(start,6);
     $('#upcomingRange').textContent=`${displayDate(start,{day:'numeric',month:'short',year:'numeric'})} — ${displayDate(end,{day:'numeric',month:'short',year:'numeric'})}`;
     const days=[];for(let i=0;i<7;i++){const date=isoAdd(start,i),tasks=tasksForDate(date);days.push({date,tasks});}
-    $('#upcomingList').innerHTML=days.map(({date,tasks})=>`<article class="agenda-day ${date===localISO()?'today':''}"><div class="agenda-date"><span class="weekday">${escapeHTML(displayDate(date,{weekday:'long'}))}${date===localISO()?' · আজ':''}</span><strong>${escapeHTML(displayDate(date,{day:'numeric'}))}</strong><small>${escapeHTML(displayDate(date,{month:'long',year:'numeric'}))}</small></div><div class="agenda-day-content"><div class="agenda-day-heading"><strong>${tasks.length?'পরিকল্পিত কাজ':'কোনো নির্ধারিত কাজ নেই'}</strong><span>${tasks.length}টি টাস্ক</span></div><div class="agenda-tasks">${tasks.length?tasks.map(t=>`<div class="agenda-task-row"><i class="agenda-task-marker"></i><div class="agenda-task-copy"><strong>${escapeHTML(t.title)}</strong><small>${escapeHTML(t.subject)} · ${escapeHTML(t.id)}</small></div><span class="agenda-task-status">${escapeHTML(statusText(t))}</span></div>`).join(''):'<div class="task-note">এই দিনটি খালি আছে—বকেয়া কাজ রিশিডিউল করার জন্য ব্যবহার করতে পারো।</div>'}</div></div></article>`).join('');
+    $('#upcomingList').innerHTML=days.map(({date,tasks})=>{const buffer=bufferInfo(date);return `<article class="agenda-day ${date===localISO()?'today':''} ${buffer?'buffer-day':''}"><div class="agenda-date"><span class="weekday">${escapeHTML(displayDate(date,{weekday:'long'}))}${date===localISO()?' · আজ':''}</span><strong>${escapeHTML(displayDate(date,{day:'numeric'}))}</strong><small>${escapeHTML(displayDate(date,{month:'long',year:'numeric'}))}</small></div><div class="agenda-day-content"><div class="agenda-day-heading"><strong>${buffer?'বাফার ডে · রিভিশন ও ক্যাচ-আপ':tasks.length?'পরিকল্পিত কাজ':'কোনো নির্ধারিত কাজ নেই'}</strong><span>${tasks.length}টি টাস্ক${buffer?' · Weekly-এর আগে':''}</span></div><div class="agenda-tasks">${tasks.length?tasks.map(t=>`<div class="agenda-task-row"><i class="agenda-task-marker"></i><div class="agenda-task-copy"><strong>${escapeHTML(t.title)}</strong><small>${escapeHTML(t.subject)} · ${escapeHTML(t.id)}</small></div><span class="agenda-task-status">${escapeHTML(statusText(t))}</span></div>`).join(''):'<div class="task-note">এই দিনটি বকেয়া কাজ শেষ করা, দুর্বল টপিক রিভিশন এবং পরবর্তী পরীক্ষার প্রস্তুতির জন্য ব্যবহার করো।</div>'}</div>${buffer?'<div class="task-note buffer-note">আজ নতুন মূল টপিক নেই। অসমাপ্ত কাজ শেষ করে Weekly Exam-এর জন্য প্রস্তুত হও।</div>':''}</div></div></article>`;}).join('');
   }
   function statusForFilter(t) { if(!isComplete(t)&&currentTaskDate(t)<localISO())return 'Overdue'; if(t.track!=='Private'&&t.examDone)return 'Exam'; if(t.studied)return 'Studied'; if(t.rescheduled)return 'Rescheduled'; return 'Pending'; }
   function renderAllTasks() {
@@ -270,7 +270,7 @@
 
   document.addEventListener('click',e=>{
     const pageBtn=e.target.closest('[data-page]');if(pageBtn){e.preventDefault();showPage(pageBtn.dataset.page);return;}
-    const action=e.target.closest('[data-action]');if(action){actOnTask(action.dataset.action,action.dataset.id);return;}
+    const action=e.target.closest('[data-action]');if(action){if(action.dataset.action==='view-overdue'){$('#allStatus').value='Overdue';$('#allTrack').value='All';showPage('tasks');renderAllTasks();return;}actOnTask(action.dataset.action,action.dataset.id);return;}
     const close=e.target.closest('[data-close]');if(close){if(close.dataset.close==='installModal')localStorage.setItem(SEEN_INSTALL_KEY,'1');closeModal(close.dataset.close);return;}
     const stage=e.target.closest('input[data-chapter]');if(stage){const id=stage.dataset.chapter,i=Number(stage.dataset.stage),arr=chapterStageArray(id).slice();arr[i]=stage.checked;state.chapterStages[id]=arr;saveState();renderSyllabus();renderDashboard();if(currentPage==='progress')renderProgress();return;}
   });
@@ -295,7 +295,7 @@
 
   // The custom first-run install prompt is separate from the native install prompt.
   // A native installation prompt is requested only after a direct user click, as browsers require.
-  hydrateIcons();renderAll();
+  hydrateIcons();renderAll();if(routineMigrated)saveState();
   if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')) {
     window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   }
