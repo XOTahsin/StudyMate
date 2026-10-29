@@ -71,7 +71,7 @@
             <div class="focus-card-head"><div><div class="mini-label">NEXT MILESTONE</div><h3>Public syllabus</h3></div><span class="focus-icon" data-icon="target"></span></div>
             <div class="focus-amount"><strong id="chapterReady">0</strong><span>/ 51 অধ্যায় প্রস্তুত</span></div>
             <div class="thin-progress"><span id="chapterBar"></span></div>
-            <div class="focus-foot"><span id="chapterStageInfo">২৫৫টি স্টাডি চেকপয়েন্ট</span><span class="gold-text">১০ Dec 2026</span></div>
+            <div class="focus-foot"><span id="chapterStageInfo">২৫৫টি স্টাডি চেকপয়েন্ট</span><span class="gold-text" id="publicDeadlineLabel">২৫ Dec 2026</span></div>
           </div>
         </div>
 
@@ -84,6 +84,11 @@
 
         <div class="section-heading"><div><div class="eyebrow">DAILY EXECUTION</div><h2>আজকের টাস্ক</h2><p>পড়া, পরীক্ষা এবং প্রয়োজন হলে নতুন তারিখ নির্ধারণ করো।</p></div><button class="outline-button" data-page="today">সবগুলো দেখুন <span data-icon="arrow"></span></button></div>
         <div class="today-panel" id="dashboardToday"></div>
+
+        <section class="recovery-section">
+          <div class="section-heading recovery-heading"><div><div class="eyebrow">RECOVERY DESK</div><h2>বকেয়া / অসম্পূর্ণ কাজ</h2><p>আগের তারিখে যেসব কাজ শেষ হয়নি, সেগুলো এখানে থাকবে। এখান থেকেই পড়া সম্পন্ন বা নতুন তারিখে রিশিডিউল করতে পারবে।</p></div><span class="pill neutral" id="dashboardOverdueCount">0টি</span></div>
+          <div id="dashboardOverdue" class="task-list"></div>
+        </section>
 
         <div class="lower-grid">
           <section class="panel upcoming-panel"><div class="panel-heading"><div><div class="mini-label">COMING UP NEXT</div><h3>পরবর্তী ৭ দিন</h3></div><button class="round-link" data-page="upcoming" aria-label="আপকামিং রুটিন দেখুন"><span data-icon="arrow"></span></button></div><div id="dashboardUpcoming" class="mini-agenda"></div></section>
@@ -107,8 +112,8 @@
 
       <section class="page" id="page-tasks">
         <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> MASTER TRACKER</div><h1>সব টাস্ক</h1><p>PDF-এর মূল টাস্ক তালিকা; স্ট্যাটাস এক জায়গা থেকেই আপডেট হবে।</p></div><button class="outline-button" id="exportQuick"><span data-icon="download"></span> ব্যাকআপ</button></div>
-        <div class="task-toolbar"><div class="search-box wide"><span data-icon="search"></span><input id="allSearch" placeholder="টপিক, বিষয় বা Task ID খুঁজুন..." autocomplete="off"></div><select id="allTrack"><option value="All">সব ট্র্যাক</option><option value="Private">Private</option><option value="Public">Public</option></select><select id="allStatus"><option value="All">সব স্ট্যাটাস</option><option value="Pending">বাকি</option><option value="Studied">পড়েছি</option><option value="Exam">এক্সাম দিয়েছি</option><option value="Rescheduled">রিশিডিউল</option></select></div>
-        <div class="table-meta"><span id="allTaskCount">130 tasks</span><span>স্ট্যাটাস বদলালে প্রগ্রেস অটো-আপডেট হবে</span></div>
+        <div class="task-toolbar"><div class="search-box wide"><span data-icon="search"></span><input id="allSearch" placeholder="টপিক, বিষয় বা Task ID খুঁজুন..." autocomplete="off"></div><select id="allTrack"><option value="All">সব ট্র্যাক</option><option value="Private">Private</option><option value="Public">Public</option></select><select id="allStatus"><option value="All">সব স্ট্যাটাস</option><option value="Pending">বাকি</option><option value="Studied">পড়েছি</option><option value="Exam">এক্সাম দিয়েছি</option><option value="Overdue">বকেয়া / Overdue</option><option value="Rescheduled">রিশিডিউল</option></select></div>
+        <div class="table-meta"><span id="allTaskCount">131 tasks</span><span>স্ট্যাটাস বদলালে প্রগ্রেস অটো-আপডেট হবে</span></div>
         <div id="allTasksList" class="task-list"></div>
       </section>
 
