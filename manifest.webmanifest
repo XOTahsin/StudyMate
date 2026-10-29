@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "StudyMate — Admission Planner",
+  "short_name": "StudyMate",
+  "description": "A focused admission study planner with tasks, exams, rescheduling, syllabus progress and offline support.",
+  "lang": "bn-BD",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0e141a",
+  "theme_color": "#111820",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

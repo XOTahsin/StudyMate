@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111820">
+  <meta name="description" content="Admission study planner — daily tasks, exams, rescheduling, syllabus progress and offline access.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="StudyMate">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>StudyMate — Admission Planner</title>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#dashboard" data-page="dashboard" aria-label="StudyMate Dashboard">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span class="brand-copy"><strong>StudyMate</strong><small>ADMISSION PLANNER</small></span>
+      </a>
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-page="dashboard"><span class="nav-icon" data-icon="grid"></span><span>ড্যাশবোর্ড</span></button>
+        <button class="nav-item" data-page="today"><span class="nav-icon" data-icon="sun"></span><span>আজকের টাস্ক</span><span class="nav-count" id="todayCount">0</span></button>
+        <button class="nav-item" data-page="upcoming"><span class="nav-icon" data-icon="calendar"></span><span>আপকামিং রুটিন</span></button>
+        <button class="nav-item" data-page="tasks"><span class="nav-icon" data-icon="list"></span><span>সব টাস্ক</span></button>
+        <button class="nav-item" data-page="syllabus"><span class="nav-icon" data-icon="book"></span><span>৫১ অধ্যায়ের সিলেবাস</span></button>
+        <button class="nav-item" data-page="progress"><span class="nav-icon" data-icon="chart"></span><span>প্রগ্রেস রিপোর্ট</span></button>
+      </nav>
+      <div class="sidebar-label">PREFERENCES</div>
+      <nav class="side-nav">
+        <button class="nav-item" data-page="settings"><span class="nav-icon" data-icon="settings"></span><span>সেটিংস ও ব্যাকআপ</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="offline-indicator"><span class="status-dot"></span><div><strong>Offline-ready</strong><small>তোমার অগ্রগতি এই ডিভাইসে সেভ হয়</small></div></div>
+        <div class="sidebar-foot">STUDY SMART. STAY CONSISTENT.</div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menuToggle" aria-label="মেনু খুলুন"><span data-icon="menu"></span></button>
+        <div class="breadcrumbs"><span>Workspace</span><span class="crumb-slash">/</span><strong id="crumbTitle">ড্যাশবোর্ড</strong></div>
+        <div class="top-actions">
+          <span class="today-chip"><span data-icon="calendar"></span><span id="topDate">আজ</span></span>
+          <button class="install-top" id="installTop"><span data-icon="download"></span><span>Install app</span></button>
+          <div class="avatar">S</div>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="welcome-row">
+          <div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR ADMISSION JOURNEY</div><h1>আবার শুরু হোক <em>ফোকাসড</em> প্রস্তুতি।</h1><p class="subhead" id="welcomeDate">আজকের কাজগুলো একে একে শেষ করো।</p></div>
+          <div class="deadline-pill"><span class="deadline-dot"></span><div><small>PRIVATE CLASS DEADLINE</small><strong>২০ নভেম্বর ২০২৬</strong></div></div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="hero-card">
+            <div class="hero-glow"></div>
+            <div class="hero-card-top"><span class="hero-tag">TODAY'S FOCUS</span><span class="hero-date" id="heroDate">29 OCT 2026</span></div>
+            <div class="hero-number" id="heroDone">0<span>/0</span></div>
+            <div class="hero-description">আজকের টাস্ক সম্পন্ন</div>
+            <div class="hero-progress"><span id="heroBar"></span></div>
+            <div class="hero-bottom"><span id="heroRemaining">আজকের কাজ বাকি নেই</span><button class="text-link light" data-page="today">আজকের তালিকা <span data-icon="arrow"></span></button></div>
+          </div>
+          <div class="focus-card">
+            <div class="focus-card-head"><div><div class="mini-label">NEXT MILESTONE</div><h3>Public syllabus</h3></div><span class="focus-icon" data-icon="target"></span></div>
+            <div class="focus-amount"><strong id="chapterReady">0</strong><span>/ 51 অধ্যায় প্রস্তুত</span></div>
+            <div class="thin-progress"><span id="chapterBar"></span></div>
+            <div class="focus-foot"><span id="chapterStageInfo">২৫৫টি স্টাডি চেকপয়েন্ট</span><span class="gold-text">১০ Dec 2026</span></div>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card"><div class="metric-top"><span class="metric-icon teal" data-icon="book"></span><span class="metric-trend" id="privateRate">0%</span></div><div class="metric-value" id="privateDone">0 <small>/ 54</small></div><div class="metric-label">Private classes complete</div><div class="metric-track"><span id="privateBar"></span></div></article>
+          <article class="metric-card"><div class="metric-top"><span class="metric-icon blue" data-icon="layers"></span><span class="metric-trend" id="publicRate">0%</span></div><div class="metric-value" id="publicDone">0 <small>/ 75</small></div><div class="metric-label">Public tasks complete</div><div class="metric-track"><span id="publicBar"></span></div></article>
+          <article class="metric-card"><div class="metric-top"><span class="metric-icon gold" data-icon="check"></span><span class="metric-trend">OVERALL</span></div><div class="metric-value" id="overallRate">0%</div><div class="metric-label">All tasks completion</div><div class="metric-track"><span id="overallBar"></span></div></article>
+          <article class="metric-card"><div class="metric-top"><span class="metric-icon coral" data-icon="alert"></span><span class="metric-trend warning-label">NEEDS ATTENTION</span></div><div class="metric-value" id="overdueCount">0 <small>tasks</small></div><div class="metric-label">বিলম্বিত টাস্ক</div><div class="metric-note" id="overdueNote">সময়মতো এগিয়ে চলো</div></article>
+        </div>
+
+        <div class="section-heading"><div><div class="eyebrow">DAILY EXECUTION</div><h2>আজকের টাস্ক</h2><p>পড়া, পরীক্ষা এবং প্রয়োজন হলে নতুন তারিখ নির্ধারণ করো।</p></div><button class="outline-button" data-page="today">সবগুলো দেখুন <span data-icon="arrow"></span></button></div>
+        <div class="today-panel" id="dashboardToday"></div>
+
+        <div class="lower-grid">
+          <section class="panel upcoming-panel"><div class="panel-heading"><div><div class="mini-label">COMING UP NEXT</div><h3>পরবর্তী ৭ দিন</h3></div><button class="round-link" data-page="upcoming" aria-label="আপকামিং রুটিন দেখুন"><span data-icon="arrow"></span></button></div><div id="dashboardUpcoming" class="mini-agenda"></div></section>
+          <section class="panel weekly-panel"><div class="panel-heading"><div><div class="mini-label">THIS WEEK</div><h3>সাপ্তাহিক প্রস্তুতি</h3></div><span class="pill neutral" id="weekRange">WEEK</span></div><div class="week-bars" id="weekBars"></div><div class="week-legend"><span><i class="legend-dot complete"></i> সম্পন্ন</span><span><i class="legend-dot pending"></i> বাকি</span></div></section>
+        </div>
+        <footer class="page-footer"><span>StudyMate <b>•</b> Admission Planner</span><span>Your progress is stored on this device.</span></footer>
+      </section>
+
+      <section class="page" id="page-today">
+        <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> DAILY EXECUTION</div><h1>আজকের টাস্ক</h1><p>প্রতিটি কাজ শেষ হলে স্ট্যাটাস আপডেট করো। কোনো কাজ মিস হলে রিশিডিউল করে দাও।</p></div><div class="date-select"><button id="prevDay" class="icon-button" aria-label="আগের দিন"><span data-icon="chevron-left"></span></button><input type="date" id="selectedDate" aria-label="তারিখ নির্বাচন"><button id="nextDay" class="icon-button" aria-label="পরের দিন"><span data-icon="chevron-right"></span></button></div></div>
+        <div class="day-summary" id="daySummary"></div>
+        <div class="filter-row"><div class="segmented" id="todayTrackFilter"><button class="selected" data-filter="All">সব</button><button data-filter="Private">Private</button><button data-filter="Public">Public</button></div><div class="search-box"><span data-icon="search"></span><input id="todaySearch" placeholder="টপিক খুঁজুন..." autocomplete="off"></div></div>
+        <div id="todayTasks" class="task-list"></div>
+      </section>
+
+      <section class="page" id="page-upcoming">
+        <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> LOOK AHEAD</div><h1>আপকামিং রুটিন</h1><p>পরের দিনগুলোতে কী পড়ার কথা আছে—এক নজরে দেখো।</p></div><button class="outline-button" id="jumpToday"><span data-icon="calendar"></span> আজকের দিন</button></div>
+        <div class="routine-toolbar"><div class="range-caption" id="upcomingRange">পরবর্তী সাত দিন</div><div class="routine-controls"><button class="icon-button" id="upPrev"><span data-icon="chevron-left"></span></button><button class="icon-button" id="upNext"><span data-icon="chevron-right"></span></button></div></div>
+        <div id="upcomingList" class="agenda-list"></div>
+      </section>
+
+      <section class="page" id="page-tasks">
+        <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> MASTER TRACKER</div><h1>সব টাস্ক</h1><p>PDF-এর মূল টাস্ক তালিকা; স্ট্যাটাস এক জায়গা থেকেই আপডেট হবে।</p></div><button class="outline-button" id="exportQuick"><span data-icon="download"></span> ব্যাকআপ</button></div>
+        <div class="task-toolbar"><div class="search-box wide"><span data-icon="search"></span><input id="allSearch" placeholder="টপিক, বিষয় বা Task ID খুঁজুন..." autocomplete="off"></div><select id="allTrack"><option value="All">সব ট্র্যাক</option><option value="Private">Private</option><option value="Public">Public</option></select><select id="allStatus"><option value="All">সব স্ট্যাটাস</option><option value="Pending">বাকি</option><option value="Studied">পড়েছি</option><option value="Exam">এক্সাম দিয়েছি</option><option value="Rescheduled">রিশিডিউল</option></select></div>
+        <div class="table-meta"><span id="allTaskCount">130 tasks</span><span>স্ট্যাটাস বদলালে প্রগ্রেস অটো-আপডেট হবে</span></div>
+        <div id="allTasksList" class="task-list"></div>
+      </section>
+
+      <section class="page" id="page-syllabus">
+        <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> CHAPTER READINESS</div><h1>৫১ অধ্যায়ের সিলেবাস</h1><p>প্রতিটি অধ্যায়ের পাঁচটি ধাপ চিহ্নিত করে Readiness ট্র্যাক করো।</p></div><div class="syllabus-total"><strong id="syllabusPercent">0%</strong><small>syllabus readiness</small></div></div>
+        <div class="syllabus-overview" id="syllabusOverview"></div>
+        <div class="task-toolbar"><div class="search-box wide"><span data-icon="search"></span><input id="chapterSearch" placeholder="অধ্যায় বা বিষয় খুঁজুন..." autocomplete="off"></div><select id="chapterSubject"><option value="All">সব বিষয়</option><option value="Physics">পদার্থবিজ্ঞান</option><option value="Higher Math">উচ্চতর গণিত</option><option value="Chemistry">রসায়ন</option></select><select id="chapterReadiness"><option value="All">সব অধ্যায়</option><option value="Incomplete">বাকি আছে</option><option value="Ready">সম্পূর্ণ প্রস্তুত</option></select></div>
+        <div id="chaptersList" class="chapter-list"></div>
+      </section>
+
+      <section class="page" id="page-progress">
+        <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> PROGRESS INSIGHTS</div><h1>প্রগ্রেস রিপোর্ট</h1><p>তোমার পড়া, পরীক্ষা এবং সিলেবাসের প্রস্তুতি একসঙ্গে ট্র্যাক করো।</p></div><span class="live-badge"><i></i> LIVE TRACKING</span></div>
+        <div id="progressSummary" class="progress-summary"></div>
+        <div class="progress-grid"><section class="panel"><div class="panel-heading"><div><div class="mini-label">BY TRACK</div><h3>ট্র্যাক অনুযায়ী অগ্রগতি</h3></div></div><div id="trackProgress" class="track-progress-list"></div></section><section class="panel"><div class="panel-heading"><div><div class="mini-label">BY SUBJECT</div><h3>বিষয় অনুযায়ী বাকি কাজ</h3></div></div><div id="subjectProgress" class="subject-progress-list"></div></section></div>
+        <section class="panel report-panel"><div class="panel-heading"><div><div class="mini-label">WEEKLY MOMENTUM</div><h3>সপ্তাহভিত্তিক কাজ</h3></div></div><div id="weeklyProgressReport" class="weekly-report"></div></section>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> PERSONAL WORKSPACE</div><h1>সেটিংস ও ব্যাকআপ</h1><p>নিজের অগ্রগতি সেভ রাখো এবং প্রয়োজন হলে অন্য ডিভাইসে নিয়ে যাও।</p></div></div>
+        <div class="settings-grid"><section class="panel settings-panel"><div class="settings-icon" data-icon="database"></div><h3>তোমার ডেটা</h3><p>টাস্কের স্ট্যাটাস ও রিশিডিউল এই ডিভাইসের ব্রাউজারে সেভ হয়। GitHub Pages-এ রাখলেও অন্য ডিভাইসে অটো-সিঙ্ক হবে না।</p><div class="settings-stat-row"><span>সেভ করা টাস্ক</span><strong id="settingsTaskCount">130</strong></div><div class="settings-stat-row"><span>শেষ ব্যাকআপ</span><strong id="lastBackupLabel">এখনও হয়নি</strong></div><div class="settings-actions"><button class="primary-button" id="exportBackup"><span data-icon="download"></span> JSON ব্যাকআপ ডাউনলোড</button><label class="outline-button file-button"><span data-icon="upload"></span> ব্যাকআপ Import<input type="file" id="importBackup" accept="application/json,.json" hidden></label></div></section>
+          <section class="panel settings-panel"><div class="settings-icon muted" data-icon="smartphone"></div><h3>Install app</h3><p>সমর্থিত ব্রাউজারে StudyMate-কে আলাদা অ্যাপ হিসেবে ইনস্টল করো। একবার ইনস্টল হলে অ্যাপ আইকন থেকে খুলবে এবং অফলাইনেও কাজ করবে।</p><div class="install-preview"><div class="app-mini-icon"><span class="brand-mark small"><span></span><span></span><span></span></span></div><div><strong>StudyMate</strong><small>Progressive Web App</small></div><span class="pill success">PWA</span></div><button class="primary-button full" id="installSettings"><span data-icon="download"></span> Install app</button><div class="small-help" id="installHelp">Chrome/Edge-এ সমর্থিত হলে Install prompt খুলবে।</div></section>
+          <section class="panel settings-panel danger-panel"><div class="settings-icon muted" data-icon="rotate"></div><h3>রিসেট অপশন</h3><p>সব টাস্কের স্ট্যাটাস এবং অধ্যায়-প্রগ্রেস প্রাথমিক অবস্থায় ফিরিয়ে দেবে। আগে ব্যাকআপ নিয়ে নাও।</p><button class="danger-button" id="resetData">সব প্রগ্রেস রিসেট</button></section></div>
+        <div class="privacy-note"><span data-icon="shield"></span><div><strong>Private by design</strong><p>এই স্ট্যাটিক অ্যাপ তোমার তথ্য কোনো সার্ভারে পাঠায় না। ডেটা local storage-এ থাকে, তাই ব্রাউজারের ডেটা মুছে ফেললে আগে ব্যাকআপ রাখবে।</p></div></div>
+      </section>
+      <footer class="mobile-footer">StudyMate • Built for consistency</footer>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="mobile-nav-item active" data-page="dashboard"><span data-icon="grid"></span><small>হোম</small></button>
+    <button class="mobile-nav-item" data-page="today"><span data-icon="sun"></span><small>আজকের কাজ</small></button>
+    <button class="mobile-nav-item" data-page="upcoming"><span data-icon="calendar"></span><small>রুটিন</small></button>
+    <button class="mobile-nav-item" data-page="syllabus"><span data-icon="book"></span><small>সিলেবাস</small></button>
+    <button class="mobile-nav-item" data-page="progress"><span data-icon="chart"></span><small>প্রগ্রেস</small></button>
+  </nav>
+
+  <div class="modal-backdrop" id="rescheduleModal" aria-hidden="true"><section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rescheduleTitle"><button class="modal-close" data-close="rescheduleModal" aria-label="বন্ধ করুন">×</button><div class="modal-symbol" data-icon="calendar-clock"></div><div class="mini-label">MOVE TASK</div><h2 id="rescheduleTitle">টাস্ক রিশিডিউল</h2><p class="modal-description" id="rescheduleTaskName">নতুন তারিখ নির্বাচন করো।</p><form id="rescheduleForm"><label class="field-label" for="rescheduleDate">নতুন তারিখ</label><input id="rescheduleDate" type="date" required><label class="field-label" for="rescheduleNote">কারণ / নোট (ঐচ্ছিক)</label><textarea id="rescheduleNote" rows="3" placeholder="যেমন: বড় অধ্যায়, অসুস্থতা, অন্য পরীক্ষা..."></textarea><div class="modal-actions"><button type="button" class="outline-button" data-close="rescheduleModal">বাতিল</button><button type="submit" class="primary-button">তারিখ সেভ করো</button></div></form></section></div>
+
+  <div class="modal-backdrop" id="installModal" aria-hidden="true"><section class="modal-card install-modal-card" role="dialog" aria-modal="true" aria-labelledby="installTitle"><button class="modal-close" data-close="installModal" aria-label="বন্ধ করুন">×</button><div class="install-hero-icon"><span class="brand-mark"><span></span><span></span><span></span></span></div><div class="mini-label">YOUR STUDY SPACE</div><h2 id="installTitle">StudyMate ইনস্টল করো</h2><p class="modal-description">হোম স্ক্রিনে আলাদা অ্যাপ হিসেবে StudyMate ব্যবহার করো—দ্রুত অ্যাক্সেস, পূর্ণ স্ক্রিন এবং অফলাইন সুবিধাসহ।</p><div class="install-benefits"><span><i data-icon="check"></i> আলাদা অ্যাপ উইন্ডো</span><span><i data-icon="check"></i> অফলাইনে কাজ করবে</span><span><i data-icon="check"></i> ডেটা এই ডিভাইসে থাকবে</span></div><button class="primary-button full install-action" id="installModalButton"><span data-icon="download"></span> Install app</button><button class="quiet-button full" id="installLater">এখন নয়</button><p class="install-fallback" id="installFallback" hidden>এই ব্রাউজারে সরাসরি Install prompt পাওয়া যাচ্ছে না। GitHub Pages-এর HTTPS লিঙ্কে Chrome খুলে মেনু থেকে “Install app” বা “Add to Home screen” নির্বাচন করো।</p></section></div>
+  <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./assets/data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
