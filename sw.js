@@ -1,4 +1,4 @@
-const CACHE_NAME = 'studymate-admission-v1.0.0';
+const CACHE_NAME = 'studymate-admission-v1.1.0';
 const CORE_ASSETS = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
   './assets/data.js', './assets/data.json', './assets/icon.svg',
