@@ -50,7 +50,8 @@ jobs:
           test -f site/assets/data.js
           echo "StudyMate static app extracted and validated."
 
-      - name: Enable GitHub Pages
+      - name: Try to enable GitHub Pages (repository setting may be required)
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
