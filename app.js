@@ -51,19 +51,22 @@
       // Preserve any user-created/imported tasks whose IDs are not in the original source.
       stored.tasks.filter(t=>!SEED.tasks.some(s=>s.id===t.id)).forEach(t=>tasks.push(t));
       state={tasks,chapterStages:stored.chapterStages||{},lastBackup:stored.lastBackup||null,routineVersion:stored.routineVersion||1};
-    } else state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null,routineVersion:SEED.meta.routineVersion||2};
-  } catch { state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null,routineVersion:SEED.meta.routineVersion||2}; }
+    } else state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null,routineVersion:SEED.meta.routineVersion||3};
+  } catch { state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null,routineVersion:SEED.meta.routineVersion||3}; }
 
   // Migrate an existing install to the revised routine once. Preserve completion states and user-rescheduled dates.
-  if((state.routineVersion||1)<(SEED.meta.routineVersion||2)) {
+  if((state.routineVersion||1)<(SEED.meta.routineVersion||3)) {
     const seeds=new Map(SEED.tasks.map(t=>[t.id,t]));
     state.tasks=state.tasks.map(t=>{
       const seed=seeds.get(t.id);
       if(!seed)return t;
       const next={...t};
-      if(t.track==='Public'&&!t.rescheduled) {
-        next.date=seed.date;
-        next.originalDate=seed.originalDate||seed.date;
+      if(t.track==='Public') {
+        next.kind=seed.kind;next.title=seed.title;next.block=seed.block;next.subject=seed.subject;
+        if(!t.rescheduled) {
+          next.date=seed.date;
+          next.originalDate=seed.originalDate||seed.date;
+        }
       }
       if(t.track==='Private'&&next.examDone) {
         next.studied=!!(next.studied||next.examDone);
@@ -71,7 +74,7 @@
       }
       return next;
     });
-    state.routineVersion=SEED.meta.routineVersion||2;
+    state.routineVersion=SEED.meta.routineVersion||3;
     routineMigrated=true;
   } else {
     state.tasks=state.tasks.map(t=>{
