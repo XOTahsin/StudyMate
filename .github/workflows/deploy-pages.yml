@@ -1,0 +1,79 @@
+name: Build and deploy StudyMate PWA
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: study-mate-pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Rebuild app files from uploaded transfer chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > /tmp/studymate.zip.b64
+          for i in $(seq -w 0 23); do
+            if [ "$i" = "01" ]; then
+              cat .studymate-bundle/fix01/part-*.txt >> /tmp/studymate.zip.b64
+            else
+              cat ".studymate-bundle/chunk-$i.txt" >> /tmp/studymate.zip.b64
+            fi
+          done
+          test "$(wc -c < /tmp/studymate.zip.b64 | tr -d ' ')" = "58048"
+          base64 --decode /tmp/studymate.zip.b64 > /tmp/studymate.zip
+          unzip -tq /tmp/studymate.zip
+          mkdir -p site /tmp/studymate-source
+          unzip -q /tmp/studymate.zip -d /tmp/studymate-source
+          test -f /tmp/studymate-source/StudyMate-PWA/index.html
+          test -f /tmp/studymate-source/StudyMate-PWA/manifest.webmanifest
+          test -f /tmp/studymate-source/StudyMate-PWA/sw.js
+          cp -R /tmp/studymate-source/StudyMate-PWA/. site/
+          test -f site/index.html
+          test -f site/assets/data.js
+          echo "StudyMate static app extracted and validated."
+
+      - name: Enable GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Publish source files at repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R site/. .
+          rm -rf .studymate-bundle site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish StudyMate PWA source files"
+            git push origin HEAD:main
+          fi
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
