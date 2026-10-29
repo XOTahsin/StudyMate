@@ -124,6 +124,7 @@
     $('#welcomeDate').textContent=displayLong(today);
     $('#topDate').textContent=displayDate(today,{day:'numeric',month:'short'});
     $('#heroDate').textContent=upperDate(today);
+    $('#publicDeadlineLabel').textContent=upperDate(SEED.meta.publicDeadline||'2026-12-25');
     $('#heroDone').innerHTML=`${complete}<span>/${todayTasks.length}</span>`;
     $('#heroBar').style.width=percentage(complete,todayTasks.length)+'%';
     $('#heroRemaining').textContent=todayTasks.length===0?'আজ কোনো টাস্ক নির্ধারিত নেই':(todayTasks.length-complete)+'টি কাজ বাকি';
@@ -136,14 +137,16 @@
     $('#publicRate').textContent=percentage(uDone,publicTasks.length)+'%'; $('#publicBar').style.width=percentage(uDone,publicTasks.length)+'%';
     $('#overallRate').textContent=percentage(allDone,state.tasks.length)+'%';$('#overallBar').style.width=percentage(allDone,state.tasks.length)+'%';
     $('#overdueCount').innerHTML=`${over.length} <small>tasks</small>`;$('#overdueNote').textContent=over.length?`${over.length}টি কাজ দেখে নাও`:'কোনো বকেয়া নেই';
+    $('#dashboardOverdueCount').textContent=`${over.length}টি`;
+    $('#dashboardOverdue').innerHTML=over.length?over.slice(0,5).map(t=>renderTaskCard(t,true)).join('')+(over.length>5?`<button class="outline-button full" data-action="view-overdue">আরও ${over.length-5}টি বকেয়া দেখুন</button>`:''):emptyMarkup('কোনো বকেয়া কাজ নেই','সব কাজ সময়মতো শেষ আছে। ভবিষ্যতে কোনো কাজ মিস হলে এখানে দেখা যাবে।');
     $('#todayCount').textContent=todayTasks.length;
-    $('#dashboardToday').innerHTML=todayTasks.length?todayTasks.slice(0,4).map(t=>renderTaskCard(t,true)).join('')+(todayTasks.length>4?`<button class="outline-button full" data-page="today">আরও ${todayTasks.length-4}টি টাস্ক দেখুন</button>`:''):emptyMarkup('আজকের তালিকা ফাঁকা','আগামী টাস্কগুলো দেখতে Upcoming Routine খুলে দেখো।');
+    $('#dashboardToday').innerHTML=todayTasks.length?todayTasks.slice(0,4).map(t=>renderTaskCard(t,true)).join('')+(todayTasks.length>4?`<button class="outline-button full" data-page="today">আরও ${todayTasks.length-4}টি টাস্ক দেখুন</button>`:''):isBufferDay(today)?emptyMarkup('আজ বাফার ডে','বকেয়া কাজ গুছিয়ে নাও, দুর্বল টপিক রিভিশন করো এবং Weekly Exam-এর প্রস্তুতি সম্পন্ন করো।'):emptyMarkup('আজকের তালিকা ফাঁকা','আগামী টাস্কগুলো দেখতে Upcoming Routine খুলে দেখো।');
     renderMiniUpcoming(today); renderWeekBars(today); hydrateIcons($('#page-dashboard'));
   }
   function renderMiniUpcoming(today) {
     let rows=[];
-    for(let i=1;i<=7;i++){const date=isoAdd(today,i), tasks=tasksForDate(date); if(tasks.length) rows.push({date,tasks});}
-    $('#dashboardUpcoming').innerHTML=rows.length?rows.slice(0,5).map(({date,tasks})=>`<div class="mini-agenda-row"><div class="mini-date">${escapeHTML(displayDate(date,{day:'numeric',month:'short'}))}</div><div class="mini-agenda-info"><strong>${escapeHTML(tasks[0].title)}${tasks.length>1?' + '+(tasks.length-1)+'টি':''}</strong><small>${escapeHTML(tasks[0].subject||'Study Task')}</small></div><div class="mini-count">${tasks.length}</div></div>`).join(''):'<div class="task-empty">আগামী ৭ দিনে কোনো টাস্ক নেই।</div>';
+    for(let i=1;i<=7;i++){const date=isoAdd(today,i), tasks=tasksForDate(date); if(tasks.length||isBufferDay(date)) rows.push({date,tasks});}
+    $('#dashboardUpcoming').innerHTML=rows.length?rows.slice(0,5).map(({date,tasks})=>`<div class="mini-agenda-row ${isBufferDay(date)?'buffer-row':''}"><div class="mini-date">${escapeHTML(displayDate(date,{day:'numeric',month:'short'}))}</div><div class="mini-agenda-info"><strong>${isBufferDay(date)?'বাফার ডে · রিভিশন':escapeHTML(tasks[0]?.title||'খালি সময়')}</strong><small>${isBufferDay(date)?'বকেয়া কাজ · Weekly প্রস্তুতি':escapeHTML(tasks[0]?.subject||'Study Task')}</small></div><div class="mini-count">${tasks.length}</div></div>`).join(''):'<div class="task-empty">আগামী ৭ দিনে কোনো টাস্ক নেই।</div>';
   }
   function renderWeekBars(today) {
     const weekday=isoWeekday(today), monday=isoAdd(today,weekday===0?-6:1-weekday), days=['সোম','মঙ্গল','বুধ','বৃহঃ','শুক্র','শনি','রবি'];
@@ -153,9 +156,10 @@
   function renderToday() {
     $('#selectedDate').value=selectedDate;
     const list=tasksForDate(selectedDate), visible=list.filter(t=>(todayTrack==='All'||t.track===todayTrack)&&`${t.id} ${t.subject} ${t.title} ${t.kind}`.toLowerCase().includes($('#todaySearch').value.trim().toLowerCase()));
-    const complete=completedCount(list), studied=list.filter(t=>t.studied).length, exams=list.filter(t=>t.examDone).length;
-    $('#daySummary').innerHTML=`<div class="day-stat"><span>মোট টাস্ক</span><strong>${list.length}</strong></div><div class="day-stat"><span>পড়েছি</span><strong>${studied}</strong></div><div class="day-stat"><span>এক্সাম দিয়েছি</span><strong>${exams}</strong></div><div class="day-stat"><span>বাকি</span><strong>${Math.max(0,list.length-complete)}</strong></div>`;
-    $('#todayTasks').innerHTML=visible.length?visible.map(t=>renderTaskCard(t)).join(''):emptyMarkup(list.length?'কোনো মিল পাওয়া যায়নি':'এই দিনে কোনো টাস্ক নেই',list.length?'ফিল্টার বা সার্চ পরিবর্তন করে দেখো।':'তারিখ বদলে অন্য দিনের রুটিন দেখো, অথবা Upcoming থেকে কাজ রিশিডিউল করো।');
+    const complete=completedCount(list), studied=list.filter(t=>t.studied).length, exams=list.filter(t=>t.track!=='Private'&&t.examDone).length;
+    const examSummary=todayTrack==='Private'?'':`<div class="day-stat"><span>এক্সাম দিয়েছি</span><strong>${exams}</strong></div>`;
+    $('#daySummary').innerHTML=`<div class="day-stat"><span>মোট টাস্ক</span><strong>${list.length}</strong></div><div class="day-stat"><span>পড়েছি</span><strong>${studied}</strong></div>${examSummary}<div class="day-stat"><span>বাকি</span><strong>${Math.max(0,list.length-complete)}</strong></div>`;
+    $('#todayTasks').innerHTML=visible.length?visible.map(t=>renderTaskCard(t)).join(''):emptyMarkup(list.length?'কোনো মিল পাওয়া যায়নি':isBufferDay(selectedDate)?'বাফার ডে · রিভিশন ও ক্যাচ-আপ':'এই দিনে কোনো টাস্ক নেই',list.length?'ফিল্টার বা সার্চ পরিবর্তন করে দেখো।':isBufferDay(selectedDate)?'এই দিনটি বকেয়া কাজ শেষ করা এবং Weekly Exam-এর প্রস্তুতির জন্য রাখা হয়েছে।':'তারিখ বদলে অন্য দিনের রুটিন দেখো, অথবা Upcoming থেকে কাজ রিশিডিউল করো।');
     $$('#todayTrackFilter button').forEach(b=>b.classList.toggle('selected',b.dataset.filter===todayTrack));
     hydrateIcons($('#page-today'));
   }
@@ -165,7 +169,7 @@
     const days=[];for(let i=0;i<7;i++){const date=isoAdd(start,i),tasks=tasksForDate(date);days.push({date,tasks});}
     $('#upcomingList').innerHTML=days.map(({date,tasks})=>`<article class="agenda-day ${date===localISO()?'today':''}"><div class="agenda-date"><span class="weekday">${escapeHTML(displayDate(date,{weekday:'long'}))}${date===localISO()?' · আজ':''}</span><strong>${escapeHTML(displayDate(date,{day:'numeric'}))}</strong><small>${escapeHTML(displayDate(date,{month:'long',year:'numeric'}))}</small></div><div class="agenda-day-content"><div class="agenda-day-heading"><strong>${tasks.length?'পরিকল্পিত কাজ':'কোনো নির্ধারিত কাজ নেই'}</strong><span>${tasks.length}টি টাস্ক</span></div><div class="agenda-tasks">${tasks.length?tasks.map(t=>`<div class="agenda-task-row"><i class="agenda-task-marker"></i><div class="agenda-task-copy"><strong>${escapeHTML(t.title)}</strong><small>${escapeHTML(t.subject)} · ${escapeHTML(t.id)}</small></div><span class="agenda-task-status">${escapeHTML(statusText(t))}</span></div>`).join(''):'<div class="task-note">এই দিনটি খালি আছে—বকেয়া কাজ রিশিডিউল করার জন্য ব্যবহার করতে পারো।</div>'}</div></div></article>`).join('');
   }
-  function statusForFilter(t) { if(t.examDone)return 'Exam'; if(t.studied)return 'Studied'; if(t.rescheduled)return 'Rescheduled'; return 'Pending'; }
+  function statusForFilter(t) { if(!isComplete(t)&&currentTaskDate(t)<localISO())return 'Overdue'; if(t.track!=='Private'&&t.examDone)return 'Exam'; if(t.studied)return 'Studied'; if(t.rescheduled)return 'Rescheduled'; return 'Pending'; }
   function renderAllTasks() {
     const q=$('#allSearch').value.trim().toLowerCase(), track=$('#allTrack').value, status=$('#allStatus').value;
     let list=state.tasks.filter(t=>(track==='All'||t.track===track)&&(status==='All'||statusForFilter(t)===status)&&`${t.id} ${t.title} ${t.subject} ${t.kind} ${t.block}`.toLowerCase().includes(q));
@@ -184,14 +188,15 @@
   }
   function renderProgress() {
     const allDone=completedCount(state.tasks), privateTasks=state.tasks.filter(t=>t.track==='Private'&&t.kind==='Private Class'), publicTasks=state.tasks.filter(t=>t.track==='Public');
-    $('#progressSummary').innerHTML=`<div class="progress-big"><span>OVERALL TASK COMPLETION</span><strong>${percentage(allDone,state.tasks.length)}%</strong><div class="thin-progress"><span style="width:${percentage(allDone,state.tasks.length)}%"></span></div></div><div class="progress-small"><span>পড়েছি</span><strong>${state.tasks.filter(t=>t.studied).length}</strong></div><div class="progress-small"><span>এক্সাম দিয়েছি</span><strong>${state.tasks.filter(t=>t.examDone).length}</strong></div><div class="progress-small"><span>Chapter ready</span><strong>${allChaptersReady()} / 51</strong></div>`;
+    $('#progressSummary').innerHTML=`<div class="progress-big"><span>OVERALL TASK COMPLETION</span><strong>${percentage(allDone,state.tasks.length)}%</strong><div class="thin-progress"><span style="width:${percentage(allDone,state.tasks.length)}%"></span></div></div><div class="progress-small"><span>পড়েছি</span><strong>${state.tasks.filter(t=>t.studied).length}</strong></div><div class="progress-small"><span>এক্সাম দিয়েছি (Public)</span><strong>${state.tasks.filter(t=>t.track==='Public'&&t.examDone).length}</strong></div><div class="progress-small"><span>Chapter ready</span><strong>${allChaptersReady()} / 51</strong></div>`;
     const tracks=[{label:'Private classes',list:privateTasks,done:completedCount(privateTasks)},{label:'Public tasks',list:publicTasks,done:completedCount(publicTasks)},{label:'Private readiness check',list:state.tasks.filter(t=>t.id==='PR-READY'),done:completedCount(state.tasks.filter(t=>t.id==='PR-READY'))}];
     $('#trackProgress').innerHTML=tracks.map(x=>`<div class="track-row"><div class="track-row-top"><span>${x.label}</span><strong>${x.done}/${x.list.length} · ${percentage(x.done,x.list.length)}%</strong></div><div class="track-progress-bar"><span style="width:${percentage(x.done,x.list.length)}%"></span></div></div>`).join('');
     const subs=new Map();state.tasks.forEach(t=>{const key=t.subject||t.track;if(!subs.has(key))subs.set(key,{all:0,done:0});const o=subs.get(key);o.all++;if(isComplete(t))o.done++;});
     const subjRows=[...subs.entries()].sort((a,b)=>a[1].done/a[1].all-b[1].done/b[1].all||b[1].all-a[1].all).slice(0,10);
     $('#subjectProgress').innerHTML=subjRows.map(([name,x])=>`<div class="subject-row"><div class="subject-row-top"><span>${escapeHTML(name)}</span><strong>${x.done}/${x.all} · ${percentage(x.done,x.all)}%</strong></div><div class="subject-progress-bar"><span style="width:${percentage(x.done,x.all)}%"></span></div></div>`).join('');
     const start='2026-10-28';
-    $('#weeklyProgressReport').innerHTML=Array.from({length:7},(_,i)=>{const a=isoAdd(start,i*7), b=isoAdd(a,6),group=state.tasks.filter(t=>currentTaskDate(t)>=a&&currentTaskDate(t)<=b),done=completedCount(group);return `<div class="weekly-block"><span>WEEK ${String(i+1).padStart(2,'0')}</span><strong>${percentage(done,group.length)}%</strong><small>${done}/${group.length} tasks</small><div class="tiny-bar"><i style="width:${percentage(done,group.length)}%"></i></div></div>`}).join('');
+    const weekCount=Math.ceil((new Date((SEED.meta.rangeEnd||start)+'T00:00:00')-new Date(start+'T00:00:00'))/86400000/7);
+    $('#weeklyProgressReport').innerHTML=Array.from({length:weekCount},(_,i)=>{const a=isoAdd(start,i*7), b=isoAdd(a,6),group=state.tasks.filter(t=>currentTaskDate(t)>=a&&currentTaskDate(t)<=b),done=completedCount(group);return `<div class="weekly-block"><span>WEEK ${String(i+1).padStart(2,'0')}</span><strong>${percentage(done,group.length)}%</strong><small>${done}/${group.length} tasks</small><div class="tiny-bar"><i style="width:${percentage(done,group.length)}%"></i></div></div>`}).join('');
   }
   function renderSettings() {
     $('#settingsTaskCount').textContent=state.tasks.length;
