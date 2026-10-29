@@ -42,7 +42,7 @@
   function escapeHTML(value='') { return String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
 
-  let state;
+  let state, routineMigrated=false;
   try {
     const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
     if(stored && Array.isArray(stored.tasks)) {
@@ -50,9 +50,35 @@
       const tasks=SEED.tasks.map(seed=>({...seed,...(storedById.get(seed.id)||{})}));
       // Preserve any user-created/imported tasks whose IDs are not in the original source.
       stored.tasks.filter(t=>!SEED.tasks.some(s=>s.id===t.id)).forEach(t=>tasks.push(t));
-      state={tasks,chapterStages:stored.chapterStages||{},lastBackup:stored.lastBackup||null};
-    } else state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null};
-  } catch { state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null}; }
+      state={tasks,chapterStages:stored.chapterStages||{},lastBackup:stored.lastBackup||null,routineVersion:stored.routineVersion||1};
+    } else state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null,routineVersion:SEED.meta.routineVersion||2};
+  } catch { state={tasks:clone(SEED.tasks),chapterStages:{},lastBackup:null,routineVersion:SEED.meta.routineVersion||2}; }
+
+  // Migrate an existing install to the revised routine once. Preserve completion states and user-rescheduled dates.
+  if((state.routineVersion||1)<(SEED.meta.routineVersion||2)) {
+    const seeds=new Map(SEED.tasks.map(t=>[t.id,t]));
+    state.tasks=state.tasks.map(t=>{
+      const seed=seeds.get(t.id);
+      if(!seed)return t;
+      const next={...t};
+      if(t.track==='Public'&&!t.rescheduled) {
+        next.date=seed.date;
+        next.originalDate=seed.originalDate||seed.date;
+      }
+      if(t.track==='Private'&&next.examDone) {
+        next.studied=!!(next.studied||next.examDone);
+        next.examDone=false;
+      }
+      return next;
+    });
+    state.routineVersion=SEED.meta.routineVersion||2;
+    routineMigrated=true;
+  } else {
+    state.tasks=state.tasks.map(t=>{
+      if(t.track==='Private'&&t.examDone) return {...t,studied:!!(t.studied||t.examDone),examDone:false};
+      return t;
+    });
+  }
   let selectedDate=localISO();
   let currentPage='dashboard';
   let todayTrack='All';
@@ -64,8 +90,10 @@
 
   function saveState() { try { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); } catch(e) { showToast('ডেটা সেভ হয়নি—স্টোরেজ খালি করো বা ব্যাকআপ নাও।',true); } }
   function currentTaskDate(t) { return t.date || t.originalDate || selectedDate; }
-  function isComplete(t) { return !!(t.studied || t.examDone); }
-  function statusText(t) { if(t.examDone) return 'এক্সাম দিয়েছি'; if(t.studied) return 'পড়েছি'; if(t.rescheduled) return 'রিশিডিউল'; return 'বাকি'; }
+  function isComplete(t) { return t.track==='Private' ? !!t.studied : !!(t.studied || t.examDone); }
+  function statusText(t) { if(t.track!=='Private'&&t.examDone) return 'এক্সাম দিয়েছি'; if(t.studied) return 'পড়েছি'; if(t.rescheduled) return 'রিশিডিউল'; return 'বাকি'; }
+  function bufferInfo(iso) { return (SEED.meta.bufferDays||[]).find(item=>item.date===iso)||null; }
+  function isBufferDay(iso) { return !!bufferInfo(iso); }
   function completedCount(list) { return list.filter(isComplete).length; }
   function percentage(a,b) { return b ? Math.round(a/b*100) : 0; }
   function getTask(id) { return state.tasks.find(t=>t.id===id); }
@@ -76,16 +104,17 @@
   function chapterReady(id) { return chapterDoneStages(id)===5; }
   function totalStageCount() { return state.chapterStages ? Object.values(state.chapterStages).reduce((sum,arr)=>sum+(arr||[]).filter(Boolean).length,0):0; }
   function allChaptersReady() { return SEED.chapters.filter(c=>chapterReady(c.id)).length; }
-  function overdueTasks() { const today=localISO(); return state.tasks.filter(t=>currentTaskDate(t)<today&&!isComplete(t)); }
+  function overdueTasks() { const today=localISO(); return state.tasks.filter(t=>currentTaskDate(t)<today&&!isComplete(t)).sort((a,b)=>currentTaskDate(a).localeCompare(currentTaskDate(b))||trackSort(a)-trackSort(b)); }
   function renderTaskCard(t, compact=false) {
-    const complete=isComplete(t), status= t.examDone?'exam':t.studied?'studied':t.rescheduled?'rescheduled':'';
+    const complete=isComplete(t), status= t.track!=='Private'&&t.examDone?'exam':t.studied?'studied':t.rescheduled?'rescheduled':'';
+    const showExamAction=t.track!=='Private'&&t.kind!=='Catch-up / Buffer'&&t.kind!=='Weekly Buffer';
     const date=currentTaskDate(t);
     const trackClass=t.track==='Private'?'private':'public';
     const dueWasMoved=t.rescheduled&&t.originalDate&&t.originalDate!==date;
     return `<article class="task-card ${t.examDone?'is-exam':t.studied?'is-studied':''}" data-task-id="${escapeHTML(t.id)}">
       <div class="task-card-main"><div class="task-card-top"><span class="task-id">${escapeHTML(t.id)}</span><span class="track-tag ${trackClass}">${t.track==='Private'?'PRIVATE':'PUBLIC'}</span><span class="kind-tag">${escapeHTML(t.kind||'Study Task')}</span><span class="status-pill ${status}">${statusText(t)}</span>${dueWasMoved?'<span class="status-pill rescheduled">তারিখ বদলানো</span>':''}</div>
       <div class="task-title">${escapeHTML(t.title||'Untitled task')}</div><div class="task-meta"><span><span data-icon="calendar"></span>${escapeHTML(displayDate(date,{day:'numeric',month:'short',year:'numeric'}))}</span><span>${escapeHTML(t.subject||t.track)}</span>${t.block?`<span class="gold-text">${escapeHTML(t.block)}</span>`:''}</div>${t.notes?`<div class="task-note">নোট: ${escapeHTML(t.notes)}</div>`:''}${dueWasMoved?`<div class="task-note">আগের তারিখ: ${escapeHTML(displayDate(t.originalDate,{day:'numeric',month:'short',year:'numeric'}))}</div>`:''}</div>
-      <div class="task-actions"><button class="action-button ${t.studied?'done':''}" data-action="studied" data-id="${escapeHTML(t.id)}" aria-pressed="${!!t.studied}"><span data-icon="check"></span>${t.studied?'পড়েছি ✓':'পড়েছি'}</button><button class="action-button ${t.examDone?'exam':''}" data-action="exam" data-id="${escapeHTML(t.id)}" aria-pressed="${!!t.examDone}"><span data-icon="target"></span>${t.examDone?'এক্সাম ✓':'এক্সাম দিয়েছি'}</button><button class="action-button reschedule" data-action="reschedule" data-id="${escapeHTML(t.id)}"><span data-icon="calendar-clock"></span>রিশিডিউল</button></div>
+      <div class="task-actions"><button class="action-button ${t.studied?'done':''}" data-action="studied" data-id="${escapeHTML(t.id)}" aria-pressed="${!!t.studied}"><span data-icon="check"></span>${t.studied?'পড়েছি ✓':'পড়েছি'}</button>${showExamAction?`<button class="action-button ${t.examDone?'exam':''}" data-action="exam" data-id="${escapeHTML(t.id)}" aria-pressed="${!!t.examDone}"><span data-icon="target"></span>${t.examDone?'এক্সাম ✓':'এক্সাম দিয়েছি'}</button>`:''}<button class="action-button reschedule" data-action="reschedule" data-id="${escapeHTML(t.id)}"><span data-icon="calendar-clock"></span>রিশিডিউল</button></div>
     </article>`;
   }
   function emptyMarkup(title,desc) { return `<div class="task-empty"><span data-icon="check"></span><strong>${escapeHTML(title)}</strong><p>${escapeHTML(desc)}</p></div>`; }
